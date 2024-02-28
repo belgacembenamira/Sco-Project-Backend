@@ -10,7 +10,8 @@
  * - Author          : belgacem
  * - Modification    :
  **/
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Category } from 'src/categories/categories.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'products' })
 export class Product {
@@ -32,4 +33,7 @@ export class Product {
 
   @Column({ name: 'qc_code', nullable: false, type: 'varchar' }) 
   qcCode: string; // Correspond au code QC du produit
+
+  @ManyToOne(() => Category, category => category.products)
+  category: Category;
 }
