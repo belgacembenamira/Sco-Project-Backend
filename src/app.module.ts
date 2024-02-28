@@ -18,6 +18,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { ProductModule } from './product/product.module';
+import { CategoryModule } from './categories/categories.module'; // Correction du nom de l'importation
+
 import * as cors from 'cors'; // Importez cors
 
 @Module({
@@ -38,6 +40,7 @@ import * as cors from 'cors'; // Importez cors
       }),
     }),
     ProductModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
