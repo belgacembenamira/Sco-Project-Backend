@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TempsAttente } from './TempsAttente.entity';
 import { UpdateStatusDto } from './UpdateStatusDto'; // Import du DTO
 import { CreateTempsAttenteDto } from './CreateTempsAttenteDto';
 import { UpdateTempsAttenteDto } from './UpdateTempsAttenteDto';
+import { PartialUpdateTempsAttenteDto } from './PartialUpdateTempsAttenteDto';
 @Injectable()
 export class TempsAttenteService {
   constructor(
@@ -53,5 +54,24 @@ export class TempsAttenteService {
     tempsAttente.tempsVeille = updateTempsAttenteDto.tempsVeille; // Corriger l'utilisation de la variable tempsVeille
 
     return await this.tempsAttenteRepository.save(tempsAttente); // Sauvegarder les modifications
+  }
+  async patchTempsAttente(
+    id: number,
+    partialUpdateDto: PartialUpdateTempsAttenteDto, // DTO partiel
+  ): Promise<TempsAttente> {
+    const existingTempsAttente = await this.tempsAttenteRepository.findOne({
+      where: { id },
+    });
+
+    if (!existingTempsAttente) {
+      throw new HttpException(
+        'TempsAttente not found',
+        HttpStatus.NOT_FOUND,
+      ); // Si l'enregistrement n'est pas trouvé
+    }
+
+    // Mise à jour partielle
+    Object.assign(existingTempsAttente, partialUpdateDto); // Applique les mises à jour partielles
+    return await this.tempsAttenteRepository.save(existingTempsAttente); // Enregistre les modifications
   }
 }

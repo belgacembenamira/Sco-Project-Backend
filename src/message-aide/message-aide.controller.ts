@@ -7,14 +7,35 @@ import {
   HttpStatus,
   Post,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { MessageAideService } from './message-aide.service';
 import { SaveAideDto } from './SaveAideDto';
 import { MessageAide } from './message-aide.entity';
+import { UpdateAideDto } from './UpdateAideDto';
 
 @Controller('message-aide')
 export class MessageAideController {
   constructor(private readonly messageAideService: MessageAideService) {}
+  @Patch('/update/:id') // Nouveau point de terminaison pour PATCH
+  async patchMessageAide(
+    @Param('id') id: number,
+    @Body() data: UpdateAideDto, // Utilisation d'un DTO partiel
+  ) {
+    const updatedData = await this.messageAideService.patchAideData(id, data);
+
+    if (!updatedData) {
+      throw new HttpException(
+        'Data with given ID not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return {
+      message: 'Data patched successfully',
+      data: updatedData,
+    };
+  }
   @Get('/:id') // Point de terminaison GET avec un identifiant
   async getMessageAideById(@Param('id') id: number): Promise<MessageAide> {
     const data = await this.messageAideService.getAideDataById(id); // Récupère les données par ID

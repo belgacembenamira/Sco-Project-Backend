@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MessageAide } from './message-aide.entity';
 import { SaveAideDto } from './SaveAideDto';
+import { UpdateAideDto } from './UpdateAideDto';
 
 @Injectable()
 export class MessageAideService {
@@ -10,6 +11,22 @@ export class MessageAideService {
     @InjectRepository(MessageAide)
     private readonly messageAideRepository: Repository<MessageAide>,
   ) {}
+  async patchAideData(
+    id: number,
+    data: UpdateAideDto, // DTO partiel
+  ): Promise<MessageAide> {
+    const existingData = await this.getAideDataById(id);
+    if (!existingData) {
+      throw new HttpException(
+        'Data with given ID not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Mise à jour partielle
+    Object.assign(existingData, data);
+    return await this.messageAideRepository.save(existingData);
+  }
   async updateAideData(
     id: number,
     data: SaveAideDto,

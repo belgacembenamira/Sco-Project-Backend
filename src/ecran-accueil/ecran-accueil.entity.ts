@@ -22,6 +22,8 @@ export class EcranAccueil {
 
   @Column({ nullable: true })
   uploadedImage: string | null; // Image téléchargée
+  @Column({ nullable: true })
+  logoPath: string | null; // lgogo
 
   @Column({ nullable: true })
   uploadedVideo: string | null; // Vidéo téléchargée
