@@ -1,53 +1,54 @@
-/* eslint-disable prettier/prettier */
-/**
-    * @description      : 
-    * @author           : belgacem
-    * @group            : 
-    * @created          : 19/02/2024 - 11:05:28
-    * 
-    * MODIFICATION LOG
-    * - Version         : 1.0.0
-    * - Date            : 19/02/2024
-    * - Author          : belgacem
-    * - Modification    : 
-**/
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { ProductModule } from './product/product.module';
-import { CategoryModule } from './categories/categories.module'; // Correction du nom de l'importation
+import * as cors from 'cors';
 
-import * as cors from 'cors'; // Importez cors
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ProductModule } from './product/product.module';
+import { CategoryModule } from './categories/categories.module';
+import { PromoCodeModule } from './promo-code/promo-code.module';
+import { SerialModule } from './serial/serial.module';
+import { ClientModule } from './client/client.module'; // Correctement importé
+import { EcranAccueilModule } from './ecran-accueil/ecran-accueil.module';
+import { MessageAideModule } from './message-aide/message-aide.module';
+import { TempsAttenteModule } from './TempsAttente/TempsAttente.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true, // Permet que le module de configuration soit accessible partout
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
+        type: 'postgres', // Changez le type de base de données selon votre besoin
         host: configService.get('DB_HOST'),
         port: +configService.get('DB_PORT'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [join(process.cwd(), 'dist/**/*.entity.js')],
-        synchronize: true,
+        entities: [join(__dirname, '**', '*.entity.{ts,js}')], // Charge toutes les entités
+        synchronize: true, // Attention : utilisez-le uniquement pour le développement
       }),
     }),
     ProductModule,
     CategoryModule,
+    PromoCodeModule,
+    SerialModule,
+    ClientModule, // Correctement importé
+    EcranAccueilModule, // Import du module complet
+    TempsAttenteModule,
+    MessageAideModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule { // Implementez NestModule
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Ajoutez le middleware cors ici
-    consumer.apply(cors()).forRoutes('*'); // Acceptez toutes les routes
+    // Applique le middleware CORS à toutes les routes
+    consumer.apply(cors()).forRoutes('*');
   }
 }
