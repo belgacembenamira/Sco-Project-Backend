@@ -5,16 +5,16 @@ export class EcranAccueil {
   @PrimaryGeneratedColumn()
   id: number; // Clé primaire auto-générée
 
-  @Column({ default: true })
+  @Column({  nullable: true  })
   ecranPub: boolean; // Écran publicitaire
 
   @Column({ default: 'fr' })
   defaultLang: string; // Langue par défaut
 
-  @Column({ default: true })
+  @Column({  nullable: true  })
   multiLang: boolean; // Support multilingue
 
-  @Column({ default: true })
+  @Column({  nullable: true  })
   logoPub: boolean; // Affichage du logo
 
   @Column({ default: false })

@@ -10,6 +10,7 @@ import {
   UploadedFile,
   BadRequestException,
   Put,
+  NotFoundException,
 } from '@nestjs/common';
 import { EcranAccueilService } from './ecran-accueil.service';
 import { EcranAccueil } from './ecran-accueil.entity';
@@ -38,8 +39,9 @@ export class EcranAccueilController {
   async getEcranAccueil(@Param('id') id: number): Promise<EcranAccueil> {
     const ecran = await this.ecranAccueilService.getEcranAccueil(id);
     if (!ecran) {
-      throw new Error('Écran non trouvé');
+      throw new NotFoundException('Écran non trouvé');
     }
+
     return ecran;
   }
 

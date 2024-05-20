@@ -14,9 +14,16 @@ import { ClientModule } from './client/client.module'; // Correctement importé
 import { EcranAccueilModule } from './ecran-accueil/ecran-accueil.module';
 import { MessageAideModule } from './message-aide/message-aide.module';
 import { TempsAttenteModule } from './TempsAttente/TempsAttente.module';
+import { ManagerModule } from './Manager/Manager.module';
+import { ModeReglementModule } from './ModeReglement/ModeReglement.module';
+import { ColorModule } from './color/color.module';
+import { EcranPanierModule } from './ecranPanier/ecranPanier.module';
+import { FideliteModule } from './Fidelite/Fidelite.module';
 
 @Module({
   imports: [
+    EcranPanierModule,
+    FideliteModule,
     ConfigModule.forRoot({
       isGlobal: true, // Permet que le module de configuration soit accessible partout
     }),
@@ -42,6 +49,11 @@ import { TempsAttenteModule } from './TempsAttente/TempsAttente.module';
     EcranAccueilModule, // Import du module complet
     TempsAttenteModule,
     MessageAideModule,
+    ManagerModule,
+    ModeReglementModule,
+    ColorModule,
+    ManagerModule,
+    EcranPanierModule,
   ],
   controllers: [AppController],
   providers: [AppService],
