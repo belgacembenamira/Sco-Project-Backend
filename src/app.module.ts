@@ -19,9 +19,11 @@ import { ModeReglementModule } from './ModeReglement/ModeReglement.module';
 import { ColorModule } from './color/color.module';
 import { EcranPanierModule } from './ecranPanier/ecranPanier.module';
 import { FideliteModule } from './Fidelite/Fidelite.module';
+import { CityModule } from './City/City.module';
 
 @Module({
-  imports: [
+  imports: [CityModule,
+
     EcranPanierModule,
     FideliteModule,
     ConfigModule.forRoot({
