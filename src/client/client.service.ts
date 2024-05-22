@@ -78,4 +78,33 @@ export class ClientService {
     client.montantSoldeCompteClient = montantSoldeCompteClient; // Mettez à jour le solde avec le montant spécifié
     await this.clientRepository.save(client);
   }
+  async addFidelityToClientBalance(
+    telcl: string,
+    fidelityToAdd: number,
+  ): Promise<void> {
+    const client = await this.clientRepository.findOne({
+      where: { telcl: telcl },
+    });
+    if (!client) {
+      throw new Error('Client not found');
+    }
+
+    client.montantSoldeCompteClient += fidelityToAdd;
+    console.log(client.montantSoldeCompteClient);
+    await this.clientRepository.save(client);
+  }
+  async findByNumeroCardfid(
+    numeroCardfid: number,
+  ): Promise<{ montantSoldeCompteClient: number; telcl: string } | undefined> {
+    const client = await this.clientRepository.findOne({
+      where: { numberCardfid: numeroCardfid },
+    });
+    if (!client) {
+      throw new Error('Client not found');
+    }
+    return {
+      montantSoldeCompteClient: client.montantSoldeCompteClient,
+      telcl: client.telcl,
+    };
+  }
 }

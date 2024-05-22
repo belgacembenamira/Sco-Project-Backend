@@ -10,7 +10,8 @@ export class Client {
 
   @Column({ nullable: true })
   nomcl: string;
-
+  @Column({ nullable: true })
+  numberCardfid: number;
   @Column({ nullable: true, name: 'montant_solde_compte_client' })
   montantSoldeCompteClient: number;
 }

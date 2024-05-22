@@ -7,6 +7,7 @@ import {
   UseGuards,
   Delete,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { Client } from './client.entity';
@@ -64,6 +65,33 @@ export class ClientController {
       return { message: 'Client balance updated successfully' };
     } catch (error) {
       return { error };
+    }
+  }
+  @Patch('addFidelity/:telcl')
+  async addFidelityToClientBalance(
+    @Param('telcl') telcl: string,
+    @Body('fidelityToAdd') fidelityToAdd: number,
+  ) {
+    try {
+      await this.clientService.addFidelityToClientBalance(telcl, fidelityToAdd);
+      return { message: 'Client fidelity added to balance successfully' };
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+  @Get('numeroCardfid/:numeroCardfid')
+  async findByNumeroCardfid(
+    @Param('numeroCardfid') numeroCardfid: number,
+  ): Promise<
+    | { montantSoldeCompteClient: number; telcl: string; error?: string }
+    | undefined
+  > {
+    try {
+      const result =
+        await this.clientService.findByNumeroCardfid(numeroCardfid);
+      return result;
+    } catch (error) {
+      return error;
     }
   }
 }

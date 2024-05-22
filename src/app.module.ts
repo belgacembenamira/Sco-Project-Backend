@@ -6,8 +6,6 @@ import * as cors from 'cors';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProductModule } from './product/product.module';
-import { CategoryModule } from './categories/categories.module';
 import { PromoCodeModule } from './promo-code/promo-code.module';
 import { SerialModule } from './serial/serial.module';
 import { ClientModule } from './client/client.module'; // Correctement importé
@@ -20,9 +18,13 @@ import { ColorModule } from './color/color.module';
 import { EcranPanierModule } from './ecranPanier/ecranPanier.module';
 import { FideliteModule } from './Fidelite/Fidelite.module';
 import { CityModule } from './City/City.module';
+import { OrderModule } from './order/order.module';
+import { PrinterService } from './printer.service';
 
 @Module({
-  imports: [CityModule,
+  imports: [
+    OrderModule,
+    CityModule,
 
     EcranPanierModule,
     FideliteModule,
@@ -43,8 +45,6 @@ import { CityModule } from './City/City.module';
         synchronize: true, // Attention : utilisez-le uniquement pour le développement
       }),
     }),
-    ProductModule,
-    CategoryModule,
     PromoCodeModule,
     SerialModule,
     ClientModule, // Correctement importé
@@ -58,7 +58,8 @@ import { CityModule } from './City/City.module';
     EcranPanierModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [PrinterService,
+AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
