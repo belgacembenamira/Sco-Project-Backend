@@ -6,9 +6,7 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  paymentModeUuiD: string;
-
+  
   @Column()
   paymentMode: string;
   @Column({ nullable: true })
