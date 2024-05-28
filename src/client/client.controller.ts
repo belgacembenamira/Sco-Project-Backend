@@ -4,14 +4,13 @@ import {
   Post,
   Body,
   Param,
-  UseGuards,
   Delete,
   Put,
   Patch,
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { Client } from './client.entity';
-import { AuthGuard } from '@nestjs/passport';
+import { CreateClientDto } from './dto/create-client.dto';
 
 @Controller('client')
 export class ClientController {
@@ -26,14 +25,11 @@ export class ClientController {
   async findOne(@Param('id') id: number): Promise<Client> {
     return this.clientService.findOne(id);
   }
+@Post()
+async create(@Body() createClientDto: CreateClientDto): Promise<Client> {
+  return this.clientService.create(createClientDto);
+}
 
-  // @UseGuards(AuthGuard('jwt'))
-  @Post()
-  async create(@Body() clientData: Partial<Client>): Promise<Client> {
-    return this.clientService.create(clientData);
-  }
-
-  // @UseGuards(AuthGuard('jwt'))
   @Post(':id')
   async update(
     @Param('id') id: number,
@@ -42,11 +38,11 @@ export class ClientController {
     return this.clientService.update(id, clientData);
   }
 
-  // @UseGuards(AuthGuard('jwt'))
   @Delete(':id/delete')
   async remove(@Param('id') id: number): Promise<void> {
     return this.clientService.remove(id);
   }
+
   @Get('telcl/:telcl')
   async findByTelcl(@Param('telcl') telcl: string): Promise<Client> {
     return this.clientService.findByTelcl(telcl);
@@ -55,7 +51,7 @@ export class ClientController {
   @Put('telcl/:telcl')
   async updateClientBalance(
     @Param('telcl') telcl: string,
-    @Body('montantSoldeCompteClient') montantSoldeCompteClient: number, // Supposons que le montant est envoyé dans le corps de la requête
+    @Body('montantSoldeCompteClient') montantSoldeCompteClient: number,
   ) {
     try {
       await this.clientService.updateClientBalance(
@@ -67,6 +63,7 @@ export class ClientController {
       return { error };
     }
   }
+
   @Patch('addFidelity/:telcl')
   async addFidelityToClientBalance(
     @Param('telcl') telcl: string,
@@ -79,19 +76,29 @@ export class ClientController {
       return { error: error.message };
     }
   }
+
   @Get('numeroCardfid/:numeroCardfid')
   async findByNumeroCardfid(
-    @Param('numeroCardfid') numeroCardfid: number,
-  ): Promise<
-    | { montantSoldeCompteClient: number; telcl: string; error?: string }
-    | undefined
-  > {
+    @Param('numeroCardfid') numeroCardfid: string,
+  ): Promise<{
+    montantSoldeCompteClient: number;
+    telcl: string;
+    nomcl: string;
+  }> {
     try {
       const result =
         await this.clientService.findByNumeroCardfid(numeroCardfid);
       return result;
     } catch (error) {
-      return error;
+      console.log(error);
     }
+  }
+
+  @Post('addClientManger')
+  async addClientManger(
+    @Body() createClientDto: CreateClientDto,
+  ): Promise<Client> {
+    console.log('Received data:', createClientDto); // Log the received data
+    return this.clientService.createClientManger(createClientDto);
   }
 }

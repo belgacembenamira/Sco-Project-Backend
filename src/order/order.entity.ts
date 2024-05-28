@@ -16,8 +16,10 @@ export class Order {
   @Column({ type: 'bigint' })
   horodatage: string;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 }) // Adjusted to decimal type
   totalttc: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true }) // Adjusted to decimal type
+  ResteAPayer: number;
 
   @Column()
   deviseCode: string;

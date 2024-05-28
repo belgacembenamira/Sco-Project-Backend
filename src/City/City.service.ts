@@ -53,4 +53,8 @@ export class CityService {
       throw new Error(`Error fetching city data: ${error.message}`);
     }
   }
+
+  async findAllCities(): Promise<City[]> {
+    return await this.cityRepository.find();
+  }
 }

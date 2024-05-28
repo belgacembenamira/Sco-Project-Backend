@@ -20,9 +20,14 @@ import { FideliteModule } from './Fidelite/Fidelite.module';
 import { CityModule } from './City/City.module';
 import { OrderModule } from './order/order.module';
 import { PrinterService } from './printer.service';
+import { CodePostalModule } from './code-postal-manager/code-postal.module';
+import { CodePromoParametrageModule } from './CodePromoParametrage/CodePromo.module';
 
 @Module({
   imports: [
+    CodePromoParametrageModule,
+    CodePostalModule,
+
     OrderModule,
     CityModule,
 
@@ -58,8 +63,7 @@ import { PrinterService } from './printer.service';
     EcranPanierModule,
   ],
   controllers: [AppController],
-  providers: [PrinterService,
-AppService],
+  providers: [PrinterService, AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

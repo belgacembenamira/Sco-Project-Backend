@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Body, Get, Injectable, Post, Res } from '@nestjs/common';
 import {
   ThermalPrinter,
   PrinterTypes,
@@ -46,36 +46,42 @@ export class PrinterService {
       this.printer.alignLeft();
       this.printer.drawLine();
 
-      this.printer.println(`Order Origin:SKO`);
+      this.printer.println(`Order Origin: SKO`);
       this.printer.println(`IP Origin: Machine SKO 5`);
 
       const formattedTimestamp = this.formatTimestamp(order.horodatage);
 
-      this.printer.println(
-        `Total: ${order.totalttc.toFixed(2)} ${order.deviseCode}`,
-      );
-      this.printer.println(`Name Client: ${order.clientPhoneNumber}`);
+      // Print total and payment details
+      this.printer.tableCustom([
+        {
+          text: `Total: ${order.totalttc.toFixed(2)} ${order.deviseCode}`,
+          align: 'LEFT',
+          width: 0.45,
+        },
+      ]);
+
+      // Print client name if available
+      if (order.clientPhoneNumber) {
+        this.printer.println(`Client Name: ${order.clientPhoneNumber}`);
+      }
 
       this.printer.drawLine();
 
-      // Add table headers for products with vertical lines
+      // Table headers for products with vertical lines
       this.printer.tableCustom([
         { text: 'Product', align: 'LEFT', width: 0.5, bold: true },
-        // { text: '||', align: 'CENTER', width: 0.05, bold: true },
         { text: 'Qty', align: 'CENTER', width: 0.1, bold: true },
-        // { text: '||', align: 'CENTER', width: 0.05, bold: true },
         { text: 'Price', align: 'RIGHT', width: 0.3, bold: true },
       ]);
       this.printer.drawLine();
 
+      // Print each product line item
       order.lines.forEach((product: Product) => {
         const totalPrice = this.getPriceByProduct(product);
 
         this.printer.tableCustom([
           { text: product.title || 'N/A', align: 'LEFT', width: 0.5 },
-          // { text: '||', align: 'CENTER', width: 0.05 },
           { text: product.qty.toString(), align: 'CENTER', width: 0.1 },
-          // { text: '||', align: 'CENTER', width: 0.05 },
           {
             text: `${totalPrice.toFixed(2)} ${order.deviseCode}`,
             align: 'RIGHT',
@@ -86,11 +92,20 @@ export class PrinterService {
 
       this.printer.drawLine();
 
-      // Print Total Order Amount
-      if (
-        order.reglements.some((payment) => payment.paymentMode === 'fidMode')
-      ) {
-        // this.printer.println('Total Order Pay using your loyalty balance');
+      // Determine payment modes
+      const containsFid = order.reglements.some(
+        (payment) => payment.paymentMode === 'fidMode',
+      );
+      const containsBankCard = order.reglements.some(
+        (payment) => payment.paymentMode === 'Bank card',
+      );
+      const containsCash = order.reglements.some(
+        (payment) => payment.paymentMode === 'Cash',
+      );
+
+      // Print based on payment scenarios
+      if (containsFid) {
+        // Case 1: Payment with fidelity points and either Bank card or Cash
         this.printer.tableCustom([
           { text: 'Total', align: 'LEFT', width: 0.5 },
           {
@@ -100,14 +115,34 @@ export class PrinterService {
           },
         ]);
         this.printer.tableCustom([
-          { text: 'Fid', align: 'LEFT', width: 0.5 },
+          { text: 'C.Fid', align: 'LEFT', width: 0.5 },
           {
             text: `-${order.totalttc.toFixed(2)} ${order.deviseCode}`,
             align: 'RIGHT',
             width: 0.45,
           },
         ]);
+        if (containsBankCard) {
+          this.printer.tableCustom([
+            { text: 'C.B', align: 'LEFT', width: 0.5 },
+            {
+              text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
+              align: 'RIGHT',
+              width: 0.45,
+            },
+          ]);
+        } else if (containsCash) {
+          this.printer.tableCustom([
+            { text: 'ESP', align: 'LEFT', width: 0.5 },
+            {
+              text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
+              align: 'RIGHT',
+              width: 0.45,
+            },
+          ]);
+        }
       } else {
+        // Case 2: Either Bank card or Cash without fidelity points
         this.printer.bold(true);
         this.printer.tableCustom([
           { text: 'Total', align: 'LEFT', width: 0.5 },
@@ -118,66 +153,57 @@ export class PrinterService {
           },
         ]);
         this.printer.bold(false);
-      }
-
-      // Print Payment Information
-      order.reglements.forEach((payment: Payment) => {
-        if (payment.paymentMode === 'Bank card') {
+        if (containsBankCard) {
           this.printer.tableCustom([
             { text: 'C.B', align: 'LEFT', width: 0.5 },
-            // { text: '', align: 'CENTER', width: 0.05 },
             {
-              text: `-${payment.paymentAmount.toFixed(2)} ${order.deviseCode}`,
+              text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
               align: 'RIGHT',
               width: 0.45,
             },
           ]);
-        }
-        if (payment.paymentMode === 'At checkout') {
+        } else if (containsCash) {
           this.printer.tableCustom([
-            { text: 'ESB', align: 'LEFT', width: 0.5 },
+            { text: 'ESP', align: 'LEFT', width: 0.5 },
             {
-              text: `-${payment.paymentAmount.toFixed(2)} ${order.deviseCode}`,
+              text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
               align: 'RIGHT',
               width: 0.45,
             },
           ]);
         }
-      });
+        this.printer.drawLine();
+      }
 
-      // Print Remise if exists
-      const totalRemise = order.lines.reduce(
-        (sum, product) => sum + (product.remize || 0),
-        0,
-      );
-      if (totalRemise > 0) {
+      // Case 3: Partial payment with C.B after accessing fidelity points
+      if (containsBankCard && containsFid) {
         this.printer.tableCustom([
-          { text: 'Total Remise', align: 'LEFT', width: 0.5 },
-          { text: '', align: 'CENTER', width: 0.05 },
+          { text: 'C.B', align: 'LEFT', width: 0.5 },
           {
-            text: `${totalRemise.toFixed(2)} ${order.deviseCode}`,
+            text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
             align: 'RIGHT',
             width: 0.45,
           },
         ]);
       }
 
-      this.printer.drawLine();
+      // Case 4: Partial payment with ESP after accessing fidelity points
+      if (containsCash && containsFid) {
+        this.printer.tableCustom([
+          { text: 'ESP', align: 'LEFT', width: 0.5 },
+          {
+            text: `-${order.ResteAPayer.toFixed(2)} ${order.deviseCode}`,
+            align: 'RIGHT',
+            width: 0.45,
+          },
+        ]);
+      }
 
-      // Print Loyalty points
-      order.reglements.forEach((payment: Payment) => {
-        if (payment.Fidelity) {
-          this.printer.println(
-            `Loyalty points added to your account: ${payment.Fidelity}`,
-          );
-          this.printer.drawLine();
-        }
-      });
-
+      // Thank you message
       this.printer.alignCenter();
       this.printer.println(`Thank you for your Order - See you soon`);
 
-      // End with a line and finalize printing
+      // Finalize printing
       this.printer.cut();
       await this.printer.execute();
       this.printer.clear();
@@ -186,6 +212,40 @@ export class PrinterService {
     } catch (error) {
       console.error('Print failed:', error);
     }
+  }
+
+  // @Post('/banque')
+  async printTicketBanque(@Body() Data: any) {
+    let lastPrintableIndex = Data.TicketContenu.length - 1;
+    while (
+      lastPrintableIndex >= 0 &&
+      Data.TicketContenu.charCodeAt(lastPrintableIndex) < 32
+    ) {
+      lastPrintableIndex--;
+    }
+
+    // Extraire la sous-chaîne avec les caractères imprimables
+    const cleanTicketContenu = Data.TicketContenu.substring(
+      0,
+      lastPrintableIndex + 1,
+    );
+
+    // console.log(cleanTicketContenu);
+    try {
+      this.printer.println(cleanTicketContenu);
+      this.printer.cut();
+
+      this.printer.execute();
+      console.log('Print done!');
+      this.printer.clear();
+      this.printOrder(Data);
+    } catch (error) {
+      console.error('Print failed:', error);
+    }
+  }
+  // @Get('/test')
+  test() {
+    return 'hello';
   }
 
   private getPriceByProduct(product: Product): number {

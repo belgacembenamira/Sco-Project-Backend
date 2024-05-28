@@ -81,4 +81,11 @@ export class PromoCodeService {
 
     await this.promoCodeRepository.remove(existingPromoCode);
   }
+  async patch(
+    id: number,
+    partialUpdateDto: Partial<PromoCodeEntity>,
+  ): Promise<PromoCodeEntity | undefined> {
+    await this.promoCodeRepository.update(id, partialUpdateDto);
+    return this.promoCodeRepository.findOne({ where: { id } });
+  }
 }

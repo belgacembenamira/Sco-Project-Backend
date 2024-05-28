@@ -1,9 +1,9 @@
 // src/client/client.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Client } from './client.entity';
+import { CreateClientDto } from './dto/create-client.dto';
 
 @Injectable()
 export class ClientService {
@@ -20,82 +20,74 @@ export class ClientService {
     return this.clientRepository.findOne({ where: { id } });
   }
 
-  async create(clientData: Partial<Client>): Promise<Client> {
-    const client = this.clientRepository.create(clientData);
-    return this.clientRepository.save(client);
+  async create(clientData: CreateClientDto): Promise<Client> {
+    const newClient = this.clientRepository.create(clientData);
+    return this.clientRepository.save(newClient);
   }
 
   async remove(id: number): Promise<void> {
     await this.clientRepository.delete(id);
   }
 
-  async findOneByNumcl(nomcl: string): Promise<Client | undefined> {
-    return this.clientRepository.findOne({ where: { nomcl: nomcl } });
-  }
   async findByTelcl(telcl: string): Promise<Client | undefined> {
     return this.clientRepository.findOne({ where: { telcl } });
   }
-  async update(
-    id: number,
-    clientData: Partial<Client>,
-  ): Promise<Client | undefined> {
-    await this.clientRepository.update(id, clientData);
-    return this.clientRepository.findOne({ where: { id } });
-  }
-  async updateByTelcl(
-    telcl: string,
-    clientData: Partial<Client>,
-  ): Promise<Client> {
-    try {
-      // Recherchez le client en fonction du numéro de téléphone
-      const client = await this.clientRepository.findOne({ where: { telcl } });
 
-      // Vérifiez si le client existe
-      if (!client) {
-        throw new Error('Client not found');
-      }
-
-      // Mettez à jour les données du client avec les nouvelles données
-      Object.assign(client, clientData);
-
-      // Sauvegardez les modifications dans la base de données
-      return this.clientRepository.save(client);
-    } catch (error) {
-      throw new Error(`Error updating client by telcl: ${error.message}`);
+  // Update method in ClientService
+  async update(id: number, clientData: Partial<Client>): Promise<Client> {
+    const client = await this.clientRepository.findOne({ where: { id } });
+    if (!client) {
+      throw new Error(`Client with ID ${id} not found`);
     }
+
+    // Update only the fields that are provided in clientData
+    if (clientData.telcl !== undefined) {
+      client.telcl = clientData.telcl;
+    }
+    if (clientData.nomcl !== undefined) {
+      client.nomcl = clientData.nomcl;
+    }
+    if (clientData.numberCardfid !== undefined) {
+      client.numberCardfid = clientData.numberCardfid;
+    }
+    if (clientData.montantSoldeCompteClient !== undefined) {
+      client.montantSoldeCompteClient = clientData.montantSoldeCompteClient;
+    }
+
+    await this.clientRepository.save(client);
+    return client;
   }
   async updateClientBalance(
     telcl: string,
     montantSoldeCompteClient: number,
   ): Promise<void> {
-    const client = await this.clientRepository.findOne({
-      where: { telcl: telcl },
-    });
+    const client = await this.clientRepository.findOne({ where: { telcl } });
     if (!client) {
       throw new Error('Client not found');
     }
 
-    client.montantSoldeCompteClient = montantSoldeCompteClient; // Mettez à jour le solde avec le montant spécifié
+    client.montantSoldeCompteClient = montantSoldeCompteClient;
     await this.clientRepository.save(client);
   }
+
   async addFidelityToClientBalance(
     telcl: string,
     fidelityToAdd: number,
   ): Promise<void> {
-    const client = await this.clientRepository.findOne({
-      where: { telcl: telcl },
-    });
+    const client = await this.clientRepository.findOne({ where: { telcl } });
     if (!client) {
       throw new Error('Client not found');
     }
 
     client.montantSoldeCompteClient += fidelityToAdd;
-    console.log(client.montantSoldeCompteClient);
     await this.clientRepository.save(client);
   }
-  async findByNumeroCardfid(
-    numeroCardfid: number,
-  ): Promise<{ montantSoldeCompteClient: number; telcl: string } | undefined> {
+
+  async findByNumeroCardfid(numeroCardfid: string): Promise<{
+    montantSoldeCompteClient: number;
+    telcl: string;
+    nomcl: string;
+  }> {
     const client = await this.clientRepository.findOne({
       where: { numberCardfid: numeroCardfid },
     });
@@ -105,6 +97,13 @@ export class ClientService {
     return {
       montantSoldeCompteClient: client.montantSoldeCompteClient,
       telcl: client.telcl,
+      nomcl: client.nomcl,
     };
+  }
+
+  async createClientManger(clientData: CreateClientDto): Promise<Client> {
+    clientData.montantSoldeCompteClient = 0;
+    const newClient = this.clientRepository.create(clientData);
+    return this.clientRepository.save(newClient);
   }
 }

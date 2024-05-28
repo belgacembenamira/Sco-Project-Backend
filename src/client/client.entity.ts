@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// src/client/entities/client.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Client {
@@ -10,8 +11,10 @@ export class Client {
 
   @Column({ nullable: true })
   nomcl: string;
+
   @Column({ nullable: true })
-  numberCardfid: number;
-  @Column({ nullable: true, name: 'montant_solde_compte_client' })
+  numberCardfid: string;
+
+  @Column({ default: 0, nullable: true })
   montantSoldeCompteClient: number;
 }

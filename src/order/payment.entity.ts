@@ -6,19 +6,19 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  
-  @Column()
+  @Column({ nullable: true })
   paymentMode: string;
+
   @Column({ nullable: true })
   Fidelity: string;
 
-  @Column()
+  @Column('float', { nullable: true }) // Use 'float' or 'double precision' instead of default type
   paymentAmount: number;
 
-  @Column('jsonb')
+  @Column('jsonb', { nullable: true })
   data: { renderAmount: number };
 
-  @Column()
+  @Column('float',{ nullable: true }) // Use 'float' or 'double precision' instead of default type
   totalAmountDeposited: number;
 
   @ManyToOne(() => Order, (order) => order.reglements, { cascade: false })

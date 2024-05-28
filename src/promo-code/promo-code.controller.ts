@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  Patch, // Importez Patch depuis '@nestjs/common'
 } from '@nestjs/common';
 import { PromoCodeEntity } from './promo-code.entity'; // Assurez-vous que le chemin d'importation est correct
 import { PromoCodeService } from './promo-code.service';
@@ -33,18 +34,19 @@ export class PromoCodeController {
     return this.promoCodeService.create(createPromoCodeDto);
   }
 
-  @Put(':id')
-  update(
+  @Patch(':id') // Utilisez Patch pour la mise à jour partielle
+  async patch(
     @Param('id') id: string,
-    @Body() updatePromoCodeDto: PromoCodeEntity,
+    @Body() partialUpdateDto: Partial<PromoCodeEntity>,
   ): Promise<PromoCodeEntity | undefined> {
-    return this.promoCodeService.update(+id, updatePromoCodeDto);
+    return this.promoCodeService.patch(+id, partialUpdateDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
     return this.promoCodeService.remove(+id);
   }
+
   @Put('by-designation/:designation')
   async updateByDesignation(
     @Param('designation') designation: string,
@@ -55,6 +57,7 @@ export class PromoCodeController {
       promoCodeData,
     );
   }
+
   @Delete('by-designation/:designation')
   async removeByDesignation(
     @Param('designation') designation: string,
