@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { City } from './city.entity';
@@ -8,6 +8,8 @@ import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class CityService {
+  private readonly logger = new Logger(CityService.name);
+
   constructor(
     @InjectRepository(City)
     private cityRepository: Repository<City>,
@@ -27,17 +29,14 @@ export class CityService {
       if (response.data.length > 0) {
         const cityData = response.data[0];
 
-        // Rechercher la ville dans la base de données par son code
         let city = await this.cityRepository.findOne({
           where: { code: cityData.code },
         });
 
         if (city) {
-          // Si la ville existe déjà, incrémentez le compteur
           city.count += 1;
-          city = await this.cityRepository.save(city); // Mettre à jour la ville dans la base de données
+          city = await this.cityRepository.save(city);
         } else {
-          // Si la ville n'existe pas, créez une nouvelle entrée dans la base de données
           city = await this.cityRepository.save({
             name: cityData.nom,
             code: cityData.code,
@@ -47,14 +46,23 @@ export class CityService {
 
         return { name: city.name, count: city.count };
       } else {
+        this.logger.warn(`City not found for postal code: ${codePostal}`);
         throw new Error('City not found');
       }
     } catch (error) {
+      this.logger.error(
+        `Error fetching city data for postal code ${codePostal}: ${error.message}`,
+      );
       throw new Error(`Error fetching city data: ${error.message}`);
     }
   }
 
   async findAllCities(): Promise<City[]> {
-    return await this.cityRepository.find();
+    try {
+      return await this.cityRepository.find();
+    } catch (error) {
+      this.logger.error(`Error fetching all cities: ${error.message}`);
+      throw new Error(`Error fetching all cities: ${error.message}`);
+    }
   }
 }

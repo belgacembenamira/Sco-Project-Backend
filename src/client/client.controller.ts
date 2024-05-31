@@ -25,10 +25,10 @@ export class ClientController {
   async findOne(@Param('id') id: number): Promise<Client> {
     return this.clientService.findOne(id);
   }
-@Post()
-async create(@Body() createClientDto: CreateClientDto): Promise<Client> {
-  return this.clientService.create(createClientDto);
-}
+  @Post()
+  async create(@Body() createClientDto: CreateClientDto): Promise<Client> {
+    return this.clientService.create(createClientDto);
+  }
 
   @Post(':id')
   async update(
@@ -44,7 +44,9 @@ async create(@Body() createClientDto: CreateClientDto): Promise<Client> {
   }
 
   @Get('telcl/:telcl')
-  async findByTelcl(@Param('telcl') telcl: string): Promise<Client> {
+  async findByTelcl(
+    @Param('telcl') telcl: string,
+  ): Promise<Client | undefined> {
     return this.clientService.findByTelcl(telcl);
   }
 
