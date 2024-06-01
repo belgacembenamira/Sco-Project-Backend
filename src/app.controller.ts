@@ -13,12 +13,12 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  @Get('/test')
-  test() {
-    return this.printerService.test();
-  }
-  @Post('/banque')
-  printer(@Body() Data: any) {
-    return this.printerService.printTicketBanque(Data);
-  }
+  // @Get('/test')
+  // test() {
+  //   return this.printerService.test();
+  // }
+  // @Post('/banque')
+  // printer(@Body() Data: any) {
+  //   return this.printerService.printTicketBanque(Data);
+  // }
 }

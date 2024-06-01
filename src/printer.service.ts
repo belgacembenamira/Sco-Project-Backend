@@ -215,38 +215,38 @@ export class PrinterService {
   }
 
   // @Post('/banque')
-  async printTicketBanque(@Body() Data: any) {
-    let lastPrintableIndex = Data.TicketContenu.length - 1;
-    while (
-      lastPrintableIndex >= 0 &&
-      Data.TicketContenu.charCodeAt(lastPrintableIndex) < 32
-    ) {
-      lastPrintableIndex--;
-    }
+  // async printTicketBanque(@Body() Data: any) {
+  //   let lastPrintableIndex = Data.TicketContenu.length - 1;
+  //   while (
+  //     lastPrintableIndex >= 0 &&
+  //     Data.TicketContenu.charCodeAt(lastPrintableIndex) < 32
+  //   ) {
+  //     lastPrintableIndex--;
+  //   }
 
-    // Extraire la sous-chaîne avec les caractères imprimables
-    const cleanTicketContenu = Data.TicketContenu.substring(
-      0,
-      lastPrintableIndex + 1,
-    );
+  //   // Extraire la sous-chaîne avec les caractères imprimables
+  //   const cleanTicketContenu = Data.TicketContenu.substring(
+  //     0,
+  //     lastPrintableIndex + 1,
+  //   );
 
-    // console.log(cleanTicketContenu);
-    try {
-      this.printer.println(cleanTicketContenu);
-      this.printer.cut();
+  //   // console.log(cleanTicketContenu);
+  //   try {
+  //     this.printer.println(cleanTicketContenu);
+  //     this.printer.cut();
 
-      this.printer.execute();
-      console.log('Print done!');
-      this.printer.clear();
-      this.printOrder(Data);
-    } catch (error) {
-      console.error('Print failed:', error);
-    }
-  }
+  //     this.printer.execute();
+  //     console.log('Print done!');
+  //     this.printer.clear();
+  //     this.printOrder(Data);
+  //   } catch (error) {
+  //     console.error('Print failed:', error);
+  //   }
+  // }
   // @Get('/test')
-  test() {
-    return 'hello';
-  }
+  // test() {
+  //   return 'hello';
+  // }
 
   private getPriceByProduct(product: Product): number {
     if (!product || !product.price || !product.price.advancedPrice) {

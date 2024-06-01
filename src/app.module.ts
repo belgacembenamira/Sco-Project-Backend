@@ -22,9 +22,11 @@ import { OrderModule } from './order/order.module';
 import { PrinterService } from './printer.service';
 import { CodePostalModule } from './code-postal-manager/code-postal.module';
 import { CodePromoParametrageModule } from './CodePromoParametrage/CodePromo.module';
+import { StripeModule } from './Stripe/Stripe.module';
 
 @Module({
-  imports: [
+  imports: [StripeModule,
+
     CodePromoParametrageModule,
     CodePostalModule,
 
